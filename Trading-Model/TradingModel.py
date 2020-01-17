@@ -46,7 +46,20 @@ class TradingModel:
     
     return df
 
-  def plotData(self):
+  def strategy(self):
+    df = self.df
+
+    buy_signals = []
+
+    for i in range (1, len(df['close'])):
+      if df['slow_sma'][i] > df['close'][i] and (df['slow_sma'][i] - df['close'][i]) > 0.03 * df['close'][i]:
+        buy_signals.append([df['time'][i], df['low'][i]])
+
+    self.plotData(buy_signals = buy_signals)
+    
+
+
+  def plotData(self, buy_signals = False):
       df = self.df
 
       # plot candlestick chart
@@ -73,6 +86,21 @@ class TradingModel:
 
       data = [candle, ssma, fsma]
 
+      if buy_signals:
+        buys = go.Scatter(
+          x = [item[0] for item in buy_signals],
+          y = [item[1] for item in buy_signals],
+          name = 'Buy Signals',
+          mode = "markers",
+        )
+        sells = go.Scatter(
+          x = [item[0] for item in buy_signals],
+          y = [item[1]*1.02 for item in buy_signals],
+          name = 'Sell Signals',
+          mode = "markers",
+        )
+      data = [candle, ssma, fsma, buys, sells]
+
       #style & display
       layout = go.Layout(title = self.symbol)
       fig = go.Figure(data = data, layout = layout)
@@ -83,7 +111,7 @@ class TradingModel:
 def Main():
     symbol = "BTCUSDT"
     model = TradingModel(symbol)
-    model.plotData()
+    model.strategy()
 
 if __name__== '__main__':
     Main()
