@@ -2,17 +2,35 @@ import pandas as pd
 import requests
 import json
 
-from pyti.smoothed_moving_average import smoothed_moving_average as sma
-
 from plotly.offline import plot
 import plotly.graph_objs as go
 
+from pyti.smoothed_moving_average import smoothed_moving_average as sma
+from pyti.bollinger_bands import lower_bollinger_band as lbb
+
+#Using Binance Class to download data for a symbol
+from Binance import Binance 
 
 class TradingModel:
 
   def __init__(self, symbol):
     self.symbol = symbol
-    self.df = self.getData()
+    self.exchange = Binance()
+    self.df = self.exchange.GetSymbolData(symbol, '1h')
+    self.last_price = self.df['close'][len(self.df['close'])-1]
+    self.buy_signals = []
+
+    try:
+      # add moving averages and lower bollinger band
+      self.df['fast_sma'] = sma(self.df['close'].tolist(), 10)
+      self.df['slow_sma'] = sma(self.df['close'].tolist(), 30)
+      self.df['low_boll'] = lbb(self.df['close'].tolist(), 14)
+    except Exception as e:
+      print('Exception raised when trying to computer indicators on'+ self.symbol)
+      print(e)
+      return None
+
+
 
   # define URL
   def getData(self):
@@ -37,10 +55,6 @@ class TradingModel:
   #converting strings to float
     for col in col_names:
       df[col] = df[col].astype(float)
-
-  # add moving averages
-    df['fast_sma'] = sma(df['close'].tolist(), 10)
-    df['slow_sma'] = sma(df['close'].tolist(), 30)
 
     print(df)
     
@@ -106,6 +120,27 @@ class TradingModel:
       fig = go.Figure(data = data, layout = layout)
 
       plot(fig, filename = self.symbol)
+
+# Moving average and Bollinger Band Strategy
+  def maStrategy(self, i:int):
+    ''' If price is 10% below slow moving average, put a buy signal'''
+    df = self.df
+    buy_price = 0.9 * df['slow_sma'][i]
+    if buy_price >= df['close'][i]:
+      self.buy_signals.append(df['time'], df['close'][i], df['close'][i] * 1.045)
+      return True
+    
+    return False
+
+  def bollStrategy(self, i:int):
+    ''' if price is 5% below lower bollinger band put a buy signal'''
+    df = self.df
+    buy_price = 0.95 * df['low_boll'][i]
+    if buy_price >= df['close'][i]:
+      self.buy_signals.append(df['time'], df['close'][i], df['close'][i] * 1.045)
+      return True
+    
+    return False    
 
 
 def Main():

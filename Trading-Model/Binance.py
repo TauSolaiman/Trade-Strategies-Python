@@ -40,14 +40,14 @@ class Binance:
 
     for pair in data['symbols']:
       if pair['status'] == 'TRADING':
-        symbols_list.append(pair)
+        symbols_list.append(pair['symbol'])
 
     return symbols_list
 
   #Get data for a single trading pair
   def GetSymbolData(self, symbol:str, interval:str):
 
-    params = '?&symbol='+self.symbol+'&interval=1h'
+    params = '?&symbol='+symbol+'&interval='+interval
 
     url = self.base + self.endpoints['klines'] + params
 
