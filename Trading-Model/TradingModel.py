@@ -16,7 +16,7 @@ class TradingModel:
 	def __init__(self, symbol):
 		self.symbol = symbol
 		self.exchange = Binance()
-		self.df = self.exchange.GetSymbolData(symbol, '4h')
+		self.df = self.exchange.GetSymbolData(symbol, '1h')
 		self.last_price = self.df['close'][len(self.df['close'])-1]
 		self.buy_signals = []
 

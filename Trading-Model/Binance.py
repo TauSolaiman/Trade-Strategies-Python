@@ -16,14 +16,16 @@ class Binance:
 		self.base = 'https://api.binance.com'
 
 		self.endpoints = {
-			"order": '/api/v1/order',
-			"testOrder": '/api/v1/order/test',
-			"allOrders": '/api/v1/allOrders',
-			"klines": '/api/v1/klines',
-			"exchangeInfo": '/api/v1/exchangeInfo'
+			"order": '/api/v3/order',
+			"testOrder": '/api/v3/order/test',
+			"allOrders": '/api/v3/allOrders',
+			"klines": '/api/v3/klines',
+			"exchangeInfo": '/api/v3/exchangeInfo'
 		}
 
-	def GetTradingSymbols(self):
+    self.headers = {"X-MBX-APIKEY": binance_keys['api_key']}
+
+	def GetTradingSymbols(self, quoteAssets=None):
 		''' Gets All symbols which are tradable (currently) '''
 		url = self.base + self.endpoints["exchangeInfo"]
 
@@ -39,6 +41,7 @@ class Binance:
 
 		for pair in data['symbols']:
 			if pair['status'] == 'TRADING':
+        if quoteAssets != None and pair['quoteAsset'] in quoteAssets:
 				symbols_list.append(pair['symbol'])
 
 		return symbols_list
@@ -100,7 +103,7 @@ class Binance:
 
 
 		try: 
-			response = requests.post(url, params=params, headers={"X-MBX-APIKEY": binance_keys['api_key']})
+			response = requests.post(url, params=params, headers=self.headers)
 		except Exception as e:
 			print(" Exception occured when trying to palce order on "+url)
 			print(e)
