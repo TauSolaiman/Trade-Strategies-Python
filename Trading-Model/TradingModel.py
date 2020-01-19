@@ -13,69 +13,75 @@ from Binance import Binance
 
 class TradingModel:
 	
-	def __init__(self, symbol):
+	def __init__(self, symbol, timeframe='1h'):
 		self.symbol = symbol
+    self.timeframe = timeframe
 		self.exchange = Binance()
-		self.df = self.exchange.GetSymbolData(symbol, '1h')
+		self.df = self.exchange.GetSymbolData(symbol, timeframe)
 		self.last_price = self.df['close'][len(self.df['close'])-1]
-		self.buy_signals = []
 
 		try:
 			self.df['fast_sma'] = sma(self.df['close'].tolist(), 10)
 			self.df['slow_sma'] = sma(self.df['close'].tolist(), 30)
 			self.df['low_boll'] = lbb(self.df['close'].tolist(), 14)
 		except Exception as e:
-			print(" Exception raised when trying to compute indicators on "+self.symbol)
+			print("Exception raised when trying to compute indicators on "+ self.symbol)
 			print(e)
 			return None
 
-	def strategy(self):	
-		
-		'''If Price is 3% below Slow Moving Average, then add Buy
-	  	Add sell signal for 2% above buying price'''
+	# def strategy(self):		
 
-		df = self.df
+	# 	'''If Price is 3% below Slow Moving Average, then add Buy
+	#   	Add sell signal for 2% above buying price'''
 
-		buy_signals = []
+	# 	df = self.df
 
-		for i in range(1, len(df['close'])):
-			if df['slow_sma'][i] > df['low'][i] and (df['slow_sma'][i] - df['low'][i]) > 0.03 * df['low'][i]:
-				buy_signals.append([df['time'][i], df['low'][i]])
+	# 	buy_signals = []
 
-		self.plotData(buy_signals = buy_signals)
+	# 	for i in range(1, len(df['close'])):
+	# 		if df['slow_sma'][i] > df['low'][i] and (df['slow_sma'][i] - df['low'][i]) > 0.03 * df['low'][i]:
+	# 			buy_signals.append([df['time'][i], df['low'][i]])
 
-	def plotData(self, buy_signals = False):
+	# 	self.plotData(buy_signals = buy_signals)
+
+
+
+	def plotData(self, buy_signals = False, sell_signals = False, plot_title="", indicators=[]):
 		df = self.df
 
 		# plot candlestick chart
 		candle = go.Candlestick(
-			x = df['time'],
+			x = df['date'],
 			open = df['open'],
 			close = df['close'],
 			high = df['high'],
 			low = df['low'],
 			name = "Candlesticks")
 
+    data = [candle]
+
+  if indicators.__contains__('fast_sma'):
 		# plot MAs
 		fsma = go.Scatter(
-			x = df['time'],
+			x = df['date'],
 			y = df['fast_sma'],
 			name = "Fast SMA",
-			line = dict(color = ('rgba(102, 207, 255, 50)')))
+			line = dict(color = ('rgba(102, 207, 255, 50)')))   
+    data.append(fsma)
 
 		ssma = go.Scatter(
-			x = df['time'],
+			x = df['date'],
 			y = df['slow_sma'],
 			name = "Slow SMA",
 			line = dict(color = ('rgba(255, 207, 102, 50)')))
+    data.append(ssma)
 
 		lowbb = go.Scatter(
-			x = df['time'],
+			x = df['date'],
 			y = df['low_boll'],
 			name = "Lower Bollinger Band",
 			line = dict(color = ('rgba(255, 102, 207, 50)')))
-
-		data = [candle, ssma, fsma, lowbb]
+    data.append(lowbb)
 
 		if buy_signals:
 			buys = go.Scatter(
@@ -83,46 +89,26 @@ class TradingModel:
 					y = [item[1] for item in buy_signals],
 					name = "Buy Signals",
 					mode = "markers",
+          marker_size = 20
 				)
+      data.append(buys)
 
+    if sell_signals:
 			sells = go.Scatter(
 					x = [item[0] for item in buy_signals],
 					y = [item[1]*1.05 for item in buy_signals],
 					name = "Sell Signals",
 					mode = "markers",
+          marker_size = 20
 				)
-
-			data = [candle, ssma, fsma, buys, sells]
+      data.append(sells)
 
 
 		# style and display
-		layout = go.Layout(title = self.symbol)
+		layout = go.Layout(title = plot_title)
 		fig = go.Figure(data = data, layout = layout)
 
-		plot(fig, filename=self.symbol+'.html')
-
-
-	def maStrategy(self, i):
-		''' If price is 20% below the Slow MA, return True'''
-
-		df = self.df
-		buy_price = 0.8 * df['slow_sma'][i]
-		if buy_price >= df['close'][i]:
-			self.buy_signals.append([df['time'][i], df['close'][i], df['close'][i] * 1.045])
-			return True
-
-		return False
-
-	def bollStrategy(self, i):
-		''' If price is 2% below the Lower Bollinger Band, return True'''
-
-		df = self.df
-		buy_price = 0.98 * df['low_boll'][i]
-		if buy_price >= df['close'][i]:
-			self.buy_signals.append([df['time'][i], df['close'][i], df['close'][i] * 1.045])
-			return True
-
-		return False
+		plot(fig, filename='graphs/'+plot_title+'.html')
 
 
 def Main():

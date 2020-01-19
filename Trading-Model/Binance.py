@@ -69,29 +69,40 @@ class Binance:
 		for col in col_names:
 			df[col] = df[col].astype(float)
 
+    # create a date column
+    df['date'] = pd.to_datetime(df['time'] * 1000000, infer_datetime_format=True)
+
 		return df
 
 
-	def PlaceOrder(self, symbol, side, type, quantity, price, test):
+	def PlaceOrder(self, symbol, side, type, quantity=0, price=0, test):
 
 		'''
-		Symbol: ETHBTC
-		ETH - base Asset (what we buy)
-		BTC - quote Asset (what we sell for)
-		quantity - how much ETH we want
-		price - how much BTC we're willing to sell it for
+		Symbol: The symbol for which to get the trading pair eg. ETHBTC	
+      ETH - base Asset (Buying)
+      BTC - quote Asset (Selling)
+
+    side: 'Buy or Sell'
+
+    type: order type, MARKET, LIMIT, STOP LOSS 
+
+		quantity: ...
 		'''
 
 		params = {
 			'symbol': symbol,
-			'side': side, 			# BUY or SELL
-			'type': type,				# MARKET, LIMIT, STOP LOSS etc
+			'side': side,
+			'type': type,
 			'timeInForce': 'GTC',
 			'quantity': quantity,
 			'price' : self.floatToString(price),
 			'recvWindow': 5000,
 			'timestamp': int(round(time.time()*1000))
 		}
+
+    if type != 'MARKET':
+      params['timeInForce'] = 'GTC'
+      params['price'] = self.floatToString(price)
 
 		self.signRequest(params)
 
@@ -104,13 +115,14 @@ class Binance:
 
 		try: 
 			response = requests.post(url, params=params, headers=self.headers)
+      data = response.text
 		except Exception as e:
-			print(" Exception occured when trying to palce order on "+url)
+			print(" Exception occured when trying to place order on "+url)
 			print(e)
-			response = {'code': '-1', 'msg':e}
+			data = {'code': '-1', 'msg':e}
 			return None
 
-		return json.loads(response.text)
+		return json.loads(data)
 
 	def CancelOrder(self, symbol, orderId):
 		'''
@@ -129,12 +141,14 @@ class Binance:
 		url = self.base + self.endpoints['order']
 
 		try: 
-			response = requests.delete(url, params=params, headers={"X-MBX-APIKEY": binance_keys['api_key']})
+			response = requests.delete(url, params=params, headers=self.headers)
+      data = response.text
 		except Exception as e:
 			print(" Exception occured when trying to cancel order on "+url)
 			print(e)
-			response = {'code': '-1', 'msg':e}
-			return None
+			date = {'code': '-1', 'msg':e}
+		
+    return json.loads(data)
 
 	def GetOrderInfo(self, symbol, orderId):
 		'''
@@ -153,14 +167,14 @@ class Binance:
 		url = self.base + self.endpoints['order']
 
 		try: 
-			response = requests.get(url, params=params, headers={"X-MBX-APIKEY": binance_keys['api_key']})
+			response = requests.get(url, params=params, headers=self.headers)
+      data = response.text
 		except Exception as e:
 			print(" Exception occured when trying to get order info on "+url)
 			print(e)
-			response = {'code': '-1', 'msg':e}
-			return None
+			data = {'code': '-1', 'msg':e}
 
-		return json.loads(response.text)
+		return json.loads(data)
 
 
 	def GetAllOrderInfo(self, symbol):
@@ -178,14 +192,14 @@ class Binance:
 		url = self.base + self.endpoints['allOrders']
 
 		try: 
-			response = requests.get(url, params=params, headers={"X-MBX-APIKEY": binance_keys['api_key']})
+			response = requests.get(url, params=params, headers=self.headers)
+      data = response.text
 		except Exception as e:
 			print(" Exception occured when trying to get info on all orders on "+url)
 			print(e)
-			response = {'code': '-1', 'msg':e}
-			return None
+			data = {'code': '-1', 'msg':e}
 
-		return json.loads(response.text)
+		return json.loads(data)
 
 	def floatToString(self, f):
 		''' Converts the given float to a string,
