@@ -4,10 +4,11 @@ import decimal
 import hmac
 import time
 import pandas as pd
+import hashlib
 
 binance_keys = {
-	'api_key': "PASTE API KEY HERE",
-	'secret_key': "PASTE SECRET KEY HERE"
+	'api_key': "hPBPEYwqrCVm9LYAKWr9e7X7B2xJHafQBDKR1gacrkptfkk0qfff1Oge0H6XDaqf",
+	'secret_key': "oXCnoSxVLcjqRVu0cA4klZsD7qq8JGmXXMUBk8ZEHOTNQTFfYs9zs7EF9f8axVXV"
 }
 
 class Binance:
@@ -23,8 +24,8 @@ class Binance:
 			"exchangeInfo": '/api/v3/exchangeInfo'
 		}
 
-    self.headers = {"X-MBX-APIKEY": binance_keys['api_key']}
-
+		self.headers = {"X-MBX-APIKEY": binance_keys['api_key']}
+	
 	def GetTradingSymbols(self, quoteAssets=None):
 		''' Gets All symbols which are tradable (currently) '''
 		url = self.base + self.endpoints["exchangeInfo"]
@@ -41,13 +42,25 @@ class Binance:
 
 		for pair in data['symbols']:
 			if pair['status'] == 'TRADING':
-        if quoteAssets != None and pair['quoteAsset'] in quoteAssets:
-				symbols_list.append(pair['symbol'])
+				if quoteAssets != None and pair['quoteAsset'] in quoteAssets:
+					symbols_list.append(pair['symbol'])
 
 		return symbols_list
 
 	def GetSymbolData(self, symbol, interval):
-		''' Gets trading data for one symbol '''
+		''' 
+		Gets trading data for one symbol 
+		
+		Parameters
+		--
+			symbol str:        The symbol for which to get the trading data
+			interval str:      The interval on which to get the trading data
+				minutes      '1m' '3m' '5m' '15m' '30m'
+				hours        '1h' '2h' '4h' '6h' '8h' '12h'
+				days         '1d' '3d'
+				weeks        '1w'
+				months       '1M;
+		'''
 
 		params = '?&symbol='+symbol+'&interval='+interval
 
@@ -69,40 +82,35 @@ class Binance:
 		for col in col_names:
 			df[col] = df[col].astype(float)
 
-    # create a date column
-    df['date'] = pd.to_datetime(df['time'] * 1000000, infer_datetime_format=True)
+		df['date'] = pd.to_datetime(df['time'] * 1000000, infer_datetime_format=True)
 
 		return df
 
 
-	def PlaceOrder(self, symbol, side, type, quantity=0, price=0, test):
+	def PlaceOrder(self, symbol, side, type, quantity=0, price=0, test=True):
 
 		'''
-		Symbol: The symbol for which to get the trading pair eg. ETHBTC	
-      ETH - base Asset (Buying)
-      BTC - quote Asset (Selling)
-
-    side: 'Buy or Sell'
-
-    type: order type, MARKET, LIMIT, STOP LOSS 
-
-		quantity: ...
+		Places an order on Binance
+		Parameters
+		--
+			symbol str:        The symbol for which to get the trading data
+			side str:          The side of the order 'BUY' or 'SELL'
+			type str:          The type, 'LIMIT', 'MARKET', 'STOP_LOSS'
+			quantity float:    .....
 		'''
 
 		params = {
 			'symbol': symbol,
-			'side': side,
-			'type': type,
-			'timeInForce': 'GTC',
+			'side': side, 			# BUY or SELL
+			'type': type,				# MARKET, LIMIT, STOP LOSS etc
 			'quantity': quantity,
-			'price' : self.floatToString(price),
 			'recvWindow': 5000,
 			'timestamp': int(round(time.time()*1000))
 		}
 
-    if type != 'MARKET':
-      params['timeInForce'] = 'GTC'
-      params['price'] = self.floatToString(price)
+		if type != 'MARKET':
+			params['timeInForce'] = 'GTC'
+			params['price'] = self.floatToString(price)
 
 		self.signRequest(params)
 
@@ -112,15 +120,13 @@ class Binance:
 		else:
 			url = self.base + self.endpoints['order']
 
-
 		try: 
 			response = requests.post(url, params=params, headers=self.headers)
-      data = response.text
+			data = response.text
 		except Exception as e:
-			print(" Exception occured when trying to place order on "+url)
+			print(" Exception occured when trying to palce order on "+url)
 			print(e)
 			data = {'code': '-1', 'msg':e}
-			return None
 
 		return json.loads(data)
 
@@ -142,13 +148,13 @@ class Binance:
 
 		try: 
 			response = requests.delete(url, params=params, headers=self.headers)
-      data = response.text
+			data = response.text
 		except Exception as e:
-			print(" Exception occured when trying to cancel order on "+url)
+			print("Exception occured when trying to cancel order on "+url)
 			print(e)
-			date = {'code': '-1', 'msg':e}
+			data = {'code': '-1', 'msg':e}
 		
-    return json.loads(data)
+		return json.loads(data)
 
 	def GetOrderInfo(self, symbol, orderId):
 		'''
@@ -168,7 +174,7 @@ class Binance:
 
 		try: 
 			response = requests.get(url, params=params, headers=self.headers)
-      data = response.text
+			data = response.text
 		except Exception as e:
 			print(" Exception occured when trying to get order info on "+url)
 			print(e)
@@ -193,9 +199,9 @@ class Binance:
 
 		try: 
 			response = requests.get(url, params=params, headers=self.headers)
-      data = response.text
+			data = response.text
 		except Exception as e:
-			print(" Exception occured when trying to get info on all orders on "+url)
+			print("Exception occured when trying to get info on all orders on "+url)
 			print(e)
 			data = {'code': '-1', 'msg':e}
 
