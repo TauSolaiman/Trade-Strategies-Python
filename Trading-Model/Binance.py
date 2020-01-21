@@ -82,6 +82,7 @@ class Binance:
 		for col in col_names:
 			df[col] = df[col].astype(float)
 
+    # create a date column 
 		df['date'] = pd.to_datetime(df['time'] * 1000000, infer_datetime_format=True)
 
 		return df
@@ -101,8 +102,8 @@ class Binance:
 
 		params = {
 			'symbol': symbol,
-			'side': side, 			# BUY or SELL
-			'type': type,				# MARKET, LIMIT, STOP LOSS etc
+			'side': side, 
+			'type': type,
 			'quantity': quantity,
 			'recvWindow': 5000,
 			'timestamp': int(round(time.time()*1000))
@@ -138,7 +139,7 @@ class Binance:
 		params = {
 			'symbol': symbol,
 			'orderId' : orderId,
-			'recvWindow': 5000,
+			'recvWindow': 5000, # request must processed within 5000 milliseconds or less
 			'timestamp': int(round(time.time()*1000))
 		}
 
@@ -207,6 +208,7 @@ class Binance:
 
 		return json.loads(data)
 
+  # Helper functions
 	def floatToString(self, f):
 		''' Converts the given float to a string,
 		without resorting to the scientific notation '''

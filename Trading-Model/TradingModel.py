@@ -21,6 +21,7 @@ class TradingModel:
 		self.last_price = self.df['close'][len(self.df['close'])-1]
 
 		try:
+      # Create columns for indicators
 			self.df['fast_sma'] = sma(self.df['close'].tolist(), 10)
 			self.df['slow_sma'] = sma(self.df['close'].tolist(), 30)
 			self.df['low_boll'] = lbb(self.df['close'].tolist(), 14)
@@ -28,23 +29,6 @@ class TradingModel:
 			print("Exception raised when trying to compute indicators on "+self.symbol)
 			print(e)
 			return None
-
-	# def strategy(self):		
-
-	# 	'''If Price is 3% below Slow Moving Average, then add Buy
-	#   	Add sell signal for 2% above buying price'''
-
-	# 	df = self.df
-
-	# 	buy_signals = []
-
-	# 	for i in range(1, len(df['close'])):
-	# 		if df['slow_sma'][i] > df['low'][i] and (df['slow_sma'][i] - df['low'][i]) > 0.03 * df['low'][i]:
-	# 			buy_signals.append([df['time'][i], df['low'][i]])
-
-	# 	self.plotData(buy_signals = buy_signals)
-
-
 
 	def plotData(self, buy_signals = False, sell_signals = False, plot_title="", indicators=[]):
 		df = self.df
@@ -91,7 +75,7 @@ class TradingModel:
 					y = [item[1] for item in buy_signals],
 					name = "Buy Signals",
 					mode = "markers",
-          marker_size = 20
+          marker_size = 10
 				)
 			data.append(buys)
 
@@ -112,32 +96,4 @@ class TradingModel:
 
 		plot(fig, filename='graphs/'+plot_title+'.html')
 
-
-def Main():
-
-    # symbol = "BTCUSDT"
-    # model = TradingModel(symbol)
-    # model.strategy()
-
-	exchange = Binance()
-	symbols = exchange.GetTradingSymbols()
-	for symbol in symbols:
-
-		print(symbol)
-		model = TradingModel(symbol)
-		plot = False
-		
-		if model.maStrategy(len(model.df['close'])-1):
-			print(" MA Strategy match on "+symbol)
-			plot = True
-
-		if model.bollStrategy(len(model.df['close'])-1):
-			print(" Boll Strategy match on "+symbol)
-			plot = True
-
-		if plot:
-			model.plotData()
-
-if __name__ == '__main__':
-	Main()
 

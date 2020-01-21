@@ -8,7 +8,7 @@ from decimal import Decimal, getcontext
 
 def BackTestStrategies(symbols=[], interval='4h', plot=False):
 
-  #backtest both strategies for every symbol
+  #backtest both strategies for every model
 
   trade_value = 100
 
@@ -58,7 +58,7 @@ def Main():
   exchange = Binance()
   symbols = exchange.GetTradingSymbols(quoteAssets=["BTC", "USDT"])
 
-  BackTestStrategies(symbols=symbols, interval='5m', plot=False)
+  BackTestStrategies(symbols=symbols, interval='4h', plot=False)
 
 if __name__ == '__main__':
   Main()

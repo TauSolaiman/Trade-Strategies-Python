@@ -8,6 +8,7 @@ class StrategyEvaluator:
 
 		self.strategy = strategy_function
 		self.settings = strategy_settings
+    
 		self.buy_times = []
 		self.sell_times = []
 
@@ -28,7 +29,8 @@ class StrategyEvaluator:
 	incremental_profits = 1.04,
 	incremental_stop_loss = 0.975):
 		'''
-		Function used to backtest a strategy given a TradingModel model
+		Function used to backtest a strategy given a TradingModel
+
 		Parameters
 		--
 			float starting balance
@@ -75,12 +77,8 @@ class StrategyEvaluator:
 					}
 					buy_times.append([df['time'][i], buy_price])
 
-					stop_loss = Decimal(initial_stop_loss)
-					profit_target = Decimal(initial_profits)
-
 			elif last_buy is not None and i > last_buy["index"] + 1:
-				# Yes (we already bought) so check whether the price has hit 
-				# EITHER the stop loss price OR the target price
+				# Yes (we already bought) so check whether the stop loss OR the target price has hit 
 				stop_loss_price = last_buy["price"] * stop_loss
 				next_target_price = last_buy["price"] * profit_target
 
@@ -117,10 +115,11 @@ class StrategyEvaluator:
 		
 		return resulting_balance
 
+# Helper Functions
 	def evaluate(self, model):
 		last_entry = len(model.df['close']) - 1
 		return self.strategy(model.df, last_entry)
-	
+
 	def updateResult(self, starting_balance, resulting_balance):
 		self.complete_starting_balance = self.complete_starting_balance + starting_balance
 		self.complete_resulting_balance = self.complete_resulting_balance + resulting_balance
