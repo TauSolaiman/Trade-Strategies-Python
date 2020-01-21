@@ -1,6 +1,10 @@
-# Trading-Model-sma
-Algorithmic cryptocurrencies trading Model using Binance API
+# Trade-Model-Binance
+Algorithmic trading strategies using python, for Binance Exchange. 
+
+Generates trading models for all currently traded assets on Binance, and backtests data for trading strategies to simulate how they would actually perform. The current strategies implemented are a moving average strategy and a Bollinger Band Strategy. 
+
+Libraries: pyti for indicators, plotly for graphs, pandas for data manipulation
 
 
-Calculating 10/30 day moving averages for the price, added buy and sell signals, and using plotly to display data in a candlestick chart. Implemented moving average and Bollinger Bands Strategy.
+
 
