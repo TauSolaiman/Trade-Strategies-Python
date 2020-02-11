@@ -58,7 +58,7 @@ def Main():
   exchange = Binance()
   symbols = exchange.GetTradingSymbols(quoteAssets=["BTC", "USDT"])
 
-  BackTestStrategies(symbols=symbols, interval='4h', plot=False)
+  BackTestStrategies(symbols=symbols, interval='4h', plot=True)
 
 if __name__ == '__main__':
   Main()

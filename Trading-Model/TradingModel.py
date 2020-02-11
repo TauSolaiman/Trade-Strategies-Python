@@ -5,9 +5,6 @@ import json
 import plotly.graph_objs as go
 from plotly.offline import plot
 
-from pyti.smoothed_moving_average import smoothed_moving_average as sma
-from pyti.bollinger_bands import lower_bollinger_band as lbb
-
 #Using Binance class to grab symbol data
 from Binance import Binance
 
@@ -20,17 +17,9 @@ class TradingModel:
 		self.df = self.exchange.GetSymbolData(symbol, timeframe)
 		self.last_price = self.df['close'][len(self.df['close'])-1]
 
-		try:
-      # Create columns for indicators
-			self.df['fast_sma'] = sma(self.df['close'].tolist(), 10)
-			self.df['slow_sma'] = sma(self.df['close'].tolist(), 30)
-			self.df['low_boll'] = lbb(self.df['close'].tolist(), 14)
-		except Exception as e:
-			print("Exception raised when trying to compute indicators on "+self.symbol)
-			print(e)
-			return None
+	#Looking directly into the dataframe to see what indicators to plot 
 
-	def plotData(self, buy_signals = False, sell_signals = False, plot_title="", indicators=[]):
+	def plotData(self, buy_signals = False, sell_signals = False, plot_title=""):
 		df = self.df
 
 		# plot candlestick chart
@@ -45,7 +34,7 @@ class TradingModel:
 		data = [candle]
 
 		# plot MAs
-		if indicators.__contains__('fast_sma'):
+		if df.__contains__('fast_sma'):
 			fsma = go.Scatter(
 				x = df['time'],
 				y = df['fast_sma'],
@@ -53,7 +42,7 @@ class TradingModel:
 				line = dict(color = ('rgba(102, 207, 255, 50)')))
 			data.append(fsma)
 
-		if indicators.__contains__('slow_sma'):
+		if df.__contains__('slow_sma'):
 			ssma = go.Scatter(
 				x = df['time'],
 				y = df['slow_sma'],
@@ -61,7 +50,7 @@ class TradingModel:
 				line = dict(color = ('rgba(255, 207, 102, 50)')))
 			data.append(ssma)
 
-		if indicators.__contains__('low_boll'):
+		if df.__contains__('low_boll'):
 			lowbb = go.Scatter(
 				x = df['time'],
 				y = df['low_boll'],
@@ -85,7 +74,7 @@ class TradingModel:
 					y = [item[1] for item in buy_signals],
 					name = "Sell Signals",
 					mode = "markers",
-          marker_size = 20
+          marker_size = 10
 				)
 			data.append(sells)
 
