@@ -58,6 +58,44 @@ class TradingModel:
 				line = dict(color = ('rgba(255, 102, 207, 50)')))
 			data.append(lowbb)
 
+		if df.__contains__('tenkansen'):
+			trace = go.Scatter(
+				x = df['time'],
+				y = df['tenkansen'],
+				name = "Tenkansen",
+				fill = None,
+				line = dict(color = ('rgba(40, 40, 140, 100)')))
+			data.append(trace)
+
+		if df.__contains__('kijunsen'):
+			trace = go.Scatter(
+				x = df['time'],
+				y = df['kijunsen'],
+				name = "Kijunsen",
+				fill = None,
+				line = dict(color = ('rgba(140, 40, 40, 100)')))
+			data.append(trace)
+
+		if df.__contains__('senkou_a'):
+			trace = go.Scatter(
+				x = df['time'],
+				y = df['senkou_a'],
+				name = "Senkou A",
+				fill = None,
+				line = dict(color = ('rgba(160, 240, 160, 100)')))
+			data.append(trace)
+
+# Area between senkou A and Senkou B is filled
+
+		if df.__contains__('senkou_b'):
+			trace = go.Scatter(
+				x = df['time'],
+				y = df['senkou_b'],
+				name = "Senkou B",
+				fill = "tonexty",
+				line = dict(color = ('rgba(240, 160, 160, 50)')))
+			data.append(trace)
+
 		if buy_signals:
 			buys = go.Scatter(
 					x = [item[0] for item in buy_signals],
@@ -80,7 +118,17 @@ class TradingModel:
 
 
 		# style and display
-		layout = go.Layout(title = plot_title)
+		layout = go.Layout(
+			title = plot_title,
+			xaxis = {
+				"title" = self.symbol,
+				"rangeslider" : {"Visible": False},
+				"type": "date"
+			},
+			yaxis = {
+				"fixedrange": False,
+				
+			})
 		fig = go.Figure(data = data, layout = layout)
 
 		plot(fig, filename='graphs/'+plot_title+'.html')
