@@ -3,8 +3,8 @@
 
 from pyti.smoothed_moving_average import smoothed_moving_average as sma
 from pyti.exponential_moving_average import exponential_moving_average as ema
-from pyti.bollinger_bands import lower_bollinger_bands as lbb
-from pyti.bollinger_bands import upper_bollinger_bands as ubb
+from pyti.bollinger_bands import lower_bollinger_band as lbb
+from pyti.bollinger_bands import upper_bollinger_band as ubb
 
 
 def ComputeIchimokuCloud(df):
@@ -57,7 +57,7 @@ class Indicators:
       else:
         df[col_name] = Indicators.INDICATORS_DICT[indicator_name](df['close'].tolist(), args)
     except Exception as e:
-      print("\n Exception raised when trying to compute " indicator_name)
+      print("\n Exception raised when trying to compute "+ indicator_name)
       print(e)
 
 

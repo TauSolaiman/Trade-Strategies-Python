@@ -121,7 +121,7 @@ class TradingModel:
 		layout = go.Layout(
 			title = plot_title,
 			xaxis = {
-				"title" = self.symbol,
+				"title" : self.symbol,
 				"rangeslider" : {"Visible": False},
 				"type": "date"
 			},

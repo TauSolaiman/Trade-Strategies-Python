@@ -87,7 +87,7 @@ incremental_profits=1.005, incremental_stop_loss=0.995)):
 
       if answer == 'p':
         print('Placing Buy Order')
-        order_result = model.exchange.PlaceOrder(model.symbol, "BUY", "MARKET", quantity=0.02, test=False)
+        order_result = model.exchange.PlaceOrder(model.symbol, "BUY", "MARKET", quantity=0.02, test=True)
         if "code" in order_result:
           print("\n ERROR")
           print(order_result)
@@ -114,7 +114,8 @@ def Main():
     StrategyEvaluator(strategy_function = Strategies.ichimokuBullish)
   ]
 
-  
+  answer = input()
+
   while answer not in ['b', 'e', 'q']:
     print(opening_text)
     answer = input()

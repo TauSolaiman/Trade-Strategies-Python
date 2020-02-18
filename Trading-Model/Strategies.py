@@ -31,16 +31,17 @@ class Strategies:
 #If price is above the cloud formed by Senkou A and Senkou B, and it moves above Tenkansen (Conversion Line), then it is a buy signal
 	@staticmethod
 	def ichimokuBullish(df, i):
-
-		if not df.__contains__('tenkansen') or not df.__contains__('kijunsen') or not df.__contains__('senkou_a') or not df.__contains__('senkou_b'):
-			Indicators.AddIndicator(df, indicator_name="ichimoku", col_name=None, args=None) 
+		if not df.__contains__('tenkansen') or not df.__contains__('kijunsen') or \
+			not df.__contains__('senkou_a') or not df.__contains__('senkou_b'):
+			Indicators.AddIndicator(df, indicator_name="ichimoku", col_name=None, args=None)
 
 		if i - 1 > 0 and i < len(df):
 			if df['senkou_a'][i] is not None and df['senkou_b'][i] is not None:
 				if df['tenkansen'][i] is not None and df['tenkansen'][i-1] is not None:
 					if df['close'][i-1] < df['tenkansen'][i-1] and \
-						df['close'][i] > df['tenkansen'] and \
-						df['close'][i] > df['senkou_a'] and \
-						df['close'][i] > df['senkou_b'] and \
+						df['close'][i] > df['tenkansen'][i] and \
+						df['close'][i] > df['senkou_a'][i] and \
+						df['close'][i] > df['senkou_b'][i]:
 							return df['close'][i]
+		
 		return False
