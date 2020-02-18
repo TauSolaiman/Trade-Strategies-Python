@@ -102,18 +102,18 @@ class TradingModel:
 					y = [item[1] for item in buy_signals],
 					name = "Buy Signals",
 					mode = "markers",
-          marker_size = 10
+					marker_size = 20
 				)
 			data.append(buys)
 
 		if sell_signals:
 			sells = go.Scatter(
-					x = [item[0] for item in buy_signals],
-					y = [item[1] for item in buy_signals],
-					name = "Sell Signals",
-					mode = "markers",
-          marker_size = 10
-				)
+				x = [item[0] for item in sell_signals],
+				y = [item[1] for item in sell_signals],
+				name = "Sell Signals",
+				mode = "markers",
+				marker_size = 20
+			)
 			data.append(sells)
 
 
@@ -122,7 +122,7 @@ class TradingModel:
 			title = plot_title,
 			xaxis = {
 				"title" : self.symbol,
-				"rangeslider" : {"Visible": False},
+				"rangeslider" : {"visible": False},
 				"type": "date"
 			},
 			yaxis = {

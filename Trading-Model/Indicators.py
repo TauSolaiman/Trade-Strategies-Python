@@ -46,7 +46,7 @@ class Indicators:
   }
 
   @staticmethod
-  def AddIndicator(df, indicator_name, column_name, args):
+  def AddIndicator(df, indicator_name, col_name, args):
     # df is the dataframe to which we will add the indicator
     # indicator_name is the name of indicator as found in the dict above
     # col_name is thename that the indicator will appear under in the dataframe

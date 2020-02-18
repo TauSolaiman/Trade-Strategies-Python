@@ -19,8 +19,8 @@ class Strategies:
 	def bollStrategy(df, i):
 		''' If price is 2.5% below the Lower Bollinger Band, return True'''
 
-		if not df.__contains__('low_ball'):
-			Indicators.AddIndicator(df, indicator_name="lbb", col_name="low_ball", args=14)
+		if not df.__contains__('low_boll'):
+			Indicators.AddIndicator(df, indicator_name="lbb", col_name="low_boll", args=14)
 
 		buy_price = 0.975 * df['low_boll'][i]
 		if buy_price >= df['close'][i]:
