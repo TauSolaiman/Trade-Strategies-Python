@@ -104,7 +104,7 @@ class Binance:
 			'symbol': symbol,
 			'side': side, 
 			'type': type,
-			'quantity': quantity,
+			'quoteOrderQty': quantity,
 			'recvWindow': 5000,
 			'timestamp': int(round(time.time()*1000))
 		}
